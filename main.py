@@ -1,44 +1,54 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from datetime import datetime
 import gspread
-from oauth2client.service_account import ServiceAccountCredentials
 import os
 import json
+from oauth2client.service_account import ServiceAccountCredentials
 from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
-# CORS設定
+# CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # デプロイ後は制限可
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-class ContactForm(BaseModel):
-    name: str
-    email: str
-    message: str
+# テンプレート & 静的ファイル
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
 
-# Google Sheets API の認証
+# Google Sheets認証
 scope = [
     "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/drive"
 ]
-
-# 環境変数からJSON文字列を取得し辞書に変換
-json_keyfile_dict = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
-
-# 認証
-creds = ServiceAccountCredentials.from_json_keyfile_dict(json_keyfile_dict, scope)
+creds_dict = json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
+creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
 client = gspread.authorize(creds)
+sheet = client.open("問い合わせ一覧").sheet1
 
-# スプレッドシートを開く
-spreadsheet = client.open("問い合わせ一覧")
-sheet = spreadsheet.sheet1
+# ページ表示
+@app.get("/", response_class=HTMLResponse)
+def get_we(request: Request):
+    return templates.TemplateResponse("we.html", {"request": request})
+
+@app.get("/thank-you", response_class=HTMLResponse)
+def thank_you(request: Request):
+    return templates.TemplateResponse("thank-you.html", {"request": request})
+
+# フォーム処理
+class ContactForm(BaseModel):
+    name: str
+    email: str
+    message: str
 
 @app.post("/contact")
 def receive_contact(form: ContactForm):
