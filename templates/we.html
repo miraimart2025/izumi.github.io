@@ -59,11 +59,12 @@
         message: form.message.value,
       };
     
-      const res = const res = await fetch("/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+     const res = await fetch("https://render-test-0ekx.onrender.com/contact", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(data),
+});
+
     
       const result = await res.json();
       if(res.ok){
