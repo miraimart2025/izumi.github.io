@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>泉　直孝 | ポートフォリオ</title>
+  <link rel="stylesheet" href="we.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <h1>泉　直孝</h1>
+      <p>大学生 / 暇人</p>
+    </div>
+  </header>
+
+  <section class="about container">
+    <h2>自己紹介</h2>
+    <div class="about-content">
+      <img src="my-photo.jpg" alt="泉 直孝の写真" class="profile-photo" />
+      <p>
+        はじめまして。公立はこだて未来大学　高度ICTコースの泉です。趣味はギターとバスケです。最近はクルマをゲットしたので、いろんなところに行ってます。
+      </p>
+    </div>
+  </section>
+
+  <section class="skills container">
+    <h2>何か</h2>
+    <ul>
+      <li>わー</li>
+      <li>いー</li>
+      <li>うー</li>
+      <li>えー</li>
+    </ul>
+  </section>
+
+  <section class="contact container">
+    <h2>お問い合わせ</h2>
+    <p>お気軽にご連絡ください。</p>
+  
+    <form id="contact-form">
+      <input type="text" name="name" placeholder="お名前" required />
+      <input type="email" name="email" placeholder="メールアドレス" required />
+      <textarea name="message" placeholder="メッセージ内容" required></textarea>
+      <button type="submit" class="btn">送信</button>
+    </form>
+    <p id="response-msg"></p>
+  </section>
+  
+  <script>
+    document.getElementById("contact-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        name: form.name.value,
+        email: form.email.value,
+        message: form.message.value,
+      };
+    
+      const res = await fetch("http://localhost:8000/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+    
+      const result = await res.json();
+      if(res.ok){
+        window.location.href = "thank-you.html";
+      } else {
+        document.getElementById("response-msg").textContent = result.message || "送信に失敗しました。";
+      }
+    });
+  </script>
+
+</body>
+</html>
